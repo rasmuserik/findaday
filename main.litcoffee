@@ -34,7 +34,7 @@ which days are possible.
       Template.hello.greeting = ->
         "Welcome to findaday."
 
-      Template.hello.events 
+      Template.hello.events
         'click input' : -> console.log "button pressed"
 
     if Meteor.isServer
