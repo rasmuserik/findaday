@@ -28,23 +28,30 @@ Initial prototype
             date.setDate 1
             date.setMonth curMonth + i
             renderMonth date
+          .join ""
 
       renderMonth = (date) ->
-        month = monthNames[date.getMonth()]
+        monthNum = date.getMonth() 
+        monthName = monthNames[monthNum]
         while date.getDay() != 1
             date.setDate(date.getDate() - 1)
 
-        console.log month
         Template.calMonth
-            monthName: month 
-            weeks: [renderWeek date for i in [1..5]].join("")
+            monthName: monthName
+            weeks: (renderWeek date, monthNum for i in [1..5]).join("")
 
-      renderWeek = (date) ->
+      renderWeek = (date, month) ->
+        days = []
+        for i in [1..7]
+            days.push renderDay date
+            date.setDate date.getDate() + 1
         Template.calWeek
-            days: "1 2 3 4 5 6 7"
+            days: days.join " "
 
-      renderLine = (date) ->
-        return " 1 2 3 4 5 6 7 "
+      renderDay = (date, month) ->
+        Template.calDay
+            date: date.getDate()
+
 
       Template.hello.calendar = ->
         renderCal()
