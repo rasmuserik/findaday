@@ -36,31 +36,34 @@ Initial prototype
         while date.getDay() != 1
             date.setDate(date.getDate() - 1)
 
+        weeks = [renderWeek date, monthNum]
+        while date.getMonth() is monthNum
+            weeks.push renderWeek date, monthNum
+
         Template.calMonth
             monthName: monthName
-            weeks: (renderWeek date, monthNum for i in [1..5]).join("")
+            weeks: weeks.join("")
 
       renderWeek = (date, month) ->
         days = []
         for i in [1..7]
-            days.push renderDay date
+            days.push renderDay date, month
             date.setDate date.getDate() + 1
         Template.calWeek
             days: days.join " "
 
       renderDay = (date, month) ->
         Template.calDay
+            inactive: date.getMonth() isnt month
             date: date.getDate()
 
 
-      Template.hello.calendar = ->
+      console.log Template
+      Template.calendar.calendar = ->
         renderCal()
 
-      Template.hello.greeting = ->
-        "Welcome to findaday."
-
-      Template.hello.events
-        'click input' : -> console.log "button pressed"
+      #Template.hello.events
+      #  'click input' : -> console.log "button pressed"
 
     if Meteor.isServer
       Meteor.startup ->
