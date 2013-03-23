@@ -3,8 +3,23 @@
 </head>
 
 <body>
+    {{>eventDescription}}
     {{>calendar}}
 </body>
+
+<template name="eventDescription">
+{{{eventDescription}}}
+</template>
+
+<template name="eventEdit">
+<h1><input id="titleEdit" value={{title}}></h1>
+<p><textarea id="descEdit">{{desc}}</textarea></p>
+</template>
+
+<template name="eventShow">
+<h1>{{title}}</h1>
+<p>{{{desc}}}</p>
+</template>
 
 <template name="calendar">
 {{{calendar}}}

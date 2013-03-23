@@ -62,6 +62,22 @@ Initial prototype
       Template.calendar.calendar = ->
         renderCal()
 
+      Template.eventDescription.eventDescription = ->
+        edit = true
+        pageName = "dummy"
+        event = eventDB.findOne {id: pageName}
+        if not event
+            event = {id: pageName, title: pageName, desc: ""}
+            eventDB.insert event 
+        if edit
+            Template.eventEdit
+                title: event.title
+                desc: event.desc
+        else
+            Template.eventShow
+                title: event.title
+                desc: event.desc
+
       #Template.hello.events
       #  'click input' : -> console.log "button pressed"
 
@@ -83,3 +99,7 @@ Initial prototype
         "October"
         "November"
         "December"]
+## Databases
+
+    eventDB = new Meteor.Collection("events")
+
