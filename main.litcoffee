@@ -62,12 +62,16 @@ Initial prototype
       Template.calendar.calendar = ->
         renderCal()
 
+### Event description
+
+      pageName = ->
+        return location.pathname.slice(1)
+
       Template.eventDescription.eventDescription = ->
-        edit = true
-        pageName = "dummy"
-        event = eventDB.findOne {id: pageName}
+        edit = Session.get "edit"
+        event = eventDB.findOne {_id: pageName()}
         if not event
-            event = {id: pageName, title: pageName, desc: ""}
+            event = {_id: pageName(), title: pageName(), desc: ""}
             eventDB.insert event 
         if edit
             Template.eventEdit
@@ -78,14 +82,23 @@ Initial prototype
                 title: event.title
                 desc: event.desc
 
-      #Template.hello.events
-      #  'click input' : -> console.log "button pressed"
+      Template.eventShow.events
+        "click #edit": ->
+            Session.set "edit", true
+
+      Template.eventEdit.events
+        "click #save": ->
+            desc = (document.getElementById "descEdit").value
+            title = (document.getElementById "titleEdit").value
+            eventDB.update {_id: pageName()}, {desc: desc, title: title}
+            Session.set "edit", false
 
     if Meteor.isServer
       Meteor.startup ->
         console.log "server startup"
 
 ## General utility functions
+
     monthNames = [
         "January"
         "February"
@@ -99,7 +112,8 @@ Initial prototype
         "October"
         "November"
         "December"]
-## Databases
+
+## Databases and global state
 
     eventDB = new Meteor.Collection("events")
 
