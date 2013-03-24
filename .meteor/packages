@@ -8,3 +8,9 @@ insecure
 preserve-inputs
 coffeescript
 stylus
+accounts-github
+accounts-facebook
+accounts-google
+accounts-twitter
+accounts-password
+accounts-ui
