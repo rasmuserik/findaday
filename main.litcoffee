@@ -4,19 +4,40 @@ This will be a simple web app for choosing days for events,
 essentially just showing a calendar, and then people can tick of
 which days are possible.
 
-# Tasks/todo
+Implemented in Literate CoffeeScript, meaning that this document is also the program :)
 
-Initial prototype
-- create calendar view
-- page for each event + link calendar-day-view to dummy database
-- user listing w/ name and checkoff
-- actual data for users and days
-- connect to mongo-db data
-- editable markdown text for the event
+
+# Crating notenotes
+
+- only log in via twitter/fb/google/..., no local login management
+- Show description and login and gray-out calender, when not logged in. 
+- creator is event-owner per default
+- event-owner can add other owners from participant list. can remove newer owners from list
+- event-owner can edit description for event
+- event-owner can set critical participants
+
+# Tasks
+
+- edit only when owner
+- participant property list when owner (critical,owner)
+- add owner / remove newer owners
+- sign-up database and clickable dates when logged in
+- unloggedin-view - gray-out + login-info
+- markdown description
+- calendar show date status 
+
+- later
+    - switch to std-dates instead of based on local time.
+    - better styling
+    - secure
+    - list of best dates
+    - change number of months shown
+
 
 # Actual implementation
 
 ## The Client
+
     if Meteor.isClient
 
 ### Render a calendar on the client
@@ -57,8 +78,6 @@ Initial prototype
             inactive: date.getMonth() isnt month
             date: date.getDate()
 
-
-      console.log Template
       Template.calendar.calendar = ->
         renderCal()
 
@@ -93,9 +112,16 @@ Initial prototype
             eventDB.update {_id: pageName()}, {desc: desc, title: title}
             Session.set "edit", false
 
+## Server
+
     if Meteor.isServer
-      Meteor.startup ->
-        console.log "server startup"
+        Meteor.startup ->
+            console.log "server startup"
+
+## Databases and global state
+
+    eventDB = new Meteor.Collection("events")
+
 
 ## General utility functions
 
@@ -112,8 +138,4 @@ Initial prototype
         "October"
         "November"
         "December"]
-
-## Databases and global state
-
-    eventDB = new Meteor.Collection("events")
 
