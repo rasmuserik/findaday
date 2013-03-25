@@ -40,6 +40,8 @@ Implemented in Literate CoffeeScript, meaning that this document is also the pro
 
     if Meteor.isClient
 
+### Create new event
+
 ### Render a calendar on the client
 
       renderCal = ->
@@ -81,6 +83,12 @@ Implemented in Literate CoffeeScript, meaning that this document is also the pro
       Template.calendar.calendar = ->
         renderCal()
 
+      Template.main.content = ->
+        if not Meteor.userId() and not eventDB.findOne {_id: pageName()} 
+            Template.signInToCreateEvent()
+        else
+            Template.event()
+
 ### Event description
 
       pageName = ->
@@ -89,6 +97,7 @@ Implemented in Literate CoffeeScript, meaning that this document is also the pro
       Template.eventDescription.eventDescription = ->
         edit = Session.get "edit"
         event = eventDB.findOne {_id: pageName()}
+        console.log event, edit
         if not event
             event = {_id: pageName(), title: pageName(), desc: ""}
             eventDB.insert event 
@@ -122,6 +131,13 @@ Implemented in Literate CoffeeScript, meaning that this document is also the pro
 
     eventDB = new Meteor.Collection("events")
 
+    if Meteor.isClient
+        Meteor.subscribe "event", pageName()
+
+    if Meteor.isServer
+        Meteor.publish "event", (event) ->
+            console.log event
+            [ eventDB.find({_id: event}) ]
 
 ## General utility functions
 

@@ -3,10 +3,22 @@
 </head>
 
 <body>
+    {{>main}}
+</body>
+
+<template name="main">
+    {{{content}}}
+</template>
+
+<template name="signInToCreateEvent">
+    Please sign in to create an event: {{loginButtons}}
+</template>
+
+<template name="event">
     {{loginButtons}}
     {{>eventDescription}}
     {{>calendar}}
-</body>
+</template>
 
 <template name="eventDescription">
 {{{eventDescription}}}
