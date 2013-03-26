@@ -71,6 +71,10 @@ Implemented in Literate CoffeeScript, meaning that this document is also the pro
 
 ## The Client
 
+    if Meteor.isClient
+        pageName = ->
+            return location.pathname.slice(1)
+
 ### Main
 
     if Meteor.isClient
@@ -84,24 +88,20 @@ Implemented in Literate CoffeeScript, meaning that this document is also the pro
 ### Event description
 
     if Meteor.isClient
-      pageName = ->
-        return location.pathname.slice(1)
 
       Template.eventDescription.eventDescription = ->
         edit = Session.get "edit"
         event = eventDB.findOne {_id: pageName()}
         console.log event, edit
         if not event
-            event = {_id: pageName(), title: pageName(), desc: ""}
+            event = {_id: pageName(), desc: "# " + pageName() + "\n\n description here..."}
             eventDB.insert event 
         if edit
             Template.eventEdit
-                title: event.title
                 desc: event.desc
         else
             Template.eventShow
-                title: event.title
-                desc: event.desc
+                desc: (new Showdown.converter()).makeHtml event.desc
 
       Template.eventShow.events
         "click #edit": ->
@@ -110,8 +110,7 @@ Implemented in Literate CoffeeScript, meaning that this document is also the pro
       Template.eventEdit.events
         "click #save": ->
             desc = (document.getElementById "descEdit").value
-            title = (document.getElementById "titleEdit").value
-            eventDB.update {_id: pageName()}, {desc: desc, title: title}
+            eventDB.update {_id: pageName()}, {desc: desc}
             console.log "HERE"
             Session.set "edit", false
 
