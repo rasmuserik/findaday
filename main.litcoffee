@@ -44,30 +44,49 @@ Implemented in Literate CoffeeScript, meaning that this document is also the pro
             createDays = ->
                 days = []
                 for day in [1..7]
+                    fulldate = fullUTCdate(date)
                     days.push
-                        inactive: date.getMonth() isnt month
-                        date: date.getDate()
-                    date.setDate date.getDate() + 1
+                        inactive: date.getUTCMonth() isnt month
+                        date: date.getUTCDate()
+                        fulldate: fulldate
+                        status: signupDB.findOne 
+                            event: pageName()
+                            user: Meteor.userId()
+                            date: fulldate
+                    date.setDate date.getUTCDate() + 1
                 days
 
-            month = date.getMonth() 
-            while date.getDay() != 1
-                date.setDate(date.getDate() - 1)
+            month = date.getUTCMonth() 
+            while date.getUTCDay() != 1
+                date.setUTCDate(date.getUTCDate() - 1)
             weeks = [createDays()]
-            while date.getMonth() is month
+            while date.getUTCMonth() is month
                 weeks.push createDays()
             weeks
 
         date = new Date()
-        curMonth = date.getMonth()
+        curMonth = date.getUTCMonth()
         [0..11].map (i) ->
-            date.setDate 1
-            date.setMonth curMonth + i
+            date.setUTCDate 1
+            date.setUTCMonth curMonth + i
             { 
-                monthNum: date.getMonth()
-                monthName: monthNames[date.getMonth()]
+                monthNum: date.getUTCMonth()
+                monthName: monthNames[date.getUTCMonth()]
                 weeks: createWeeks()
             }
+### Bind clicks
+
+    if Meteor.isClient and Meteor.userId()
+        Template.calendar.events
+            "click .day": (a, b, c, d) ->
+                console.log "this", this
+                console.log "abcd", a, b, c, d
+                query = 
+                    event: pageName(),
+                    user: Meteor.userId()
+                    date: this.fulldate
+                console.log "query", query
+                signupDB.update query, {status: "√"}, {upsert: true}
 
 ## The Client
 
@@ -123,6 +142,7 @@ Implemented in Literate CoffeeScript, meaning that this document is also the pro
 ## Databases and global state
 
     eventDB = new Meteor.Collection("events")
+    signupDB = new Meteor.Collection("signups")
 
     if Meteor.isClient
         Meteor.subscribe "event", pageName()
@@ -130,9 +150,15 @@ Implemented in Literate CoffeeScript, meaning that this document is also the pro
     if Meteor.isServer
         Meteor.publish "event", (event) ->
             console.log event
-            [ eventDB.find {_id: event} ]
+            [ (eventDB.find {_id: event}), (signupDB.find {event: event}) ]
 
 ## General utility functions
+
+    fullUTCdate = (date) ->
+        date.getUTCFullYear() + "-" + 
+        (date.getUTCMonth() + 1) + "-" + 
+        date.getUTCDate()
+
 
     monthNames = [
         "January"
