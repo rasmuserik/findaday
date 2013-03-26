@@ -51,7 +51,10 @@
         <span class="day header">s</span>
         <span class="day header">s</span>
     </div>
-{{{weeks}}}</div></template>
+    {{#each weeks}}
+        {{{this}}}
+    {{/each}}
+</div></template>
 
-<template name="calWeek"><div class="week">{{{days}}}</div></template>
+<template name="calWeek"><div class="week">{{#each days}}{{{this}}}{{/each}}</div></template>
 <template name="calDay"><span class="day{{#if inactive true}} inactive{{/if}}">{{{date}}}</day></template>

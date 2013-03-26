@@ -36,14 +36,16 @@ Implemented in Literate CoffeeScript, meaning that this document is also the pro
 
 # Actual implementation
 
-## The Client
+## Event model
 
     if Meteor.isClient
+        undefined
 
-### Create new event
+## The Client
 
 ### Render a calendar on the client
 
+    if Meteor.isClient
       renderCal = ->
         date = new Date()
         curMonth = date.getMonth()
@@ -55,6 +57,7 @@ Implemented in Literate CoffeeScript, meaning that this document is also the pro
 
       renderMonth = (date) ->
         monthNum = date.getMonth() 
+        console.log monthNum
         monthName = monthNames[monthNum]
         while date.getDay() != 1
             date.setDate(date.getDate() - 1)
@@ -65,7 +68,7 @@ Implemented in Literate CoffeeScript, meaning that this document is also the pro
 
         Template.calMonth
             monthName: monthName
-            weeks: weeks.join("")
+            weeks: weeks
 
       renderWeek = (date, month) ->
         days = []
@@ -73,7 +76,7 @@ Implemented in Literate CoffeeScript, meaning that this document is also the pro
             days.push renderDay date, month
             date.setDate date.getDate() + 1
         Template.calWeek
-            days: days.join " "
+            days: days
 
       renderDay = (date, month) ->
         Template.calDay
@@ -82,6 +85,8 @@ Implemented in Literate CoffeeScript, meaning that this document is also the pro
 
       Template.calendar.calendar = ->
         renderCal()
+
+## Main
 
       Template.main.content = ->
         if not Meteor.userId() and not eventDB.findOne {_id: pageName()} 
@@ -119,6 +124,7 @@ Implemented in Literate CoffeeScript, meaning that this document is also the pro
             desc = (document.getElementById "descEdit").value
             title = (document.getElementById "titleEdit").value
             eventDB.update {_id: pageName()}, {desc: desc, title: title}
+            console.log "HERE"
             Session.set "edit", false
 
 ## Server
@@ -137,7 +143,7 @@ Implemented in Literate CoffeeScript, meaning that this document is also the pro
     if Meteor.isServer
         Meteor.publish "event", (event) ->
             console.log event
-            [ eventDB.find({_id: event}) ]
+            [ eventDB.find {_id: event} ]
 
 ## General utility functions
 
