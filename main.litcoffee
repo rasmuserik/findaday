@@ -36,66 +36,54 @@ Implemented in Literate CoffeeScript, meaning that this document is also the pro
 
 # Actual implementation
 
-## Event model
 
-    if Meteor.isClient
-        undefined
+## Calendar data structure
 
-## The Client
+    createMonths = ->
+        createWeeks = ->
+            createDays = ->
+                days = []
+                for day in [1..7]
+                    days.push
+                        inactive: date.getMonth() isnt month
+                        date: date.getDate()
+                    date.setDate date.getDate() + 1
+                days
 
-### Render a calendar on the client
+            month = date.getMonth() 
+            while date.getDay() != 1
+                date.setDate(date.getDate() - 1)
+            weeks = [createDays()]
+            while date.getMonth() is month
+                weeks.push createDays()
+            weeks
 
-    if Meteor.isClient
-      renderCal = ->
         date = new Date()
         curMonth = date.getMonth()
         [0..11].map (i) ->
             date.setDate 1
             date.setMonth curMonth + i
-            renderMonth date
-          .join ""
+            { 
+                monthNum: date.getMonth()
+                monthName: monthNames[date.getMonth()]
+                weeks: createWeeks()
+            }
 
-      renderMonth = (date) ->
-        monthNum = date.getMonth() 
-        console.log monthNum
-        monthName = monthNames[monthNum]
-        while date.getDay() != 1
-            date.setDate(date.getDate() - 1)
+## The Client
 
-        weeks = [renderWeek date, monthNum]
-        while date.getMonth() is monthNum
-            weeks.push renderWeek date, monthNum
+### Main
 
-        Template.calMonth
-            monthName: monthName
-            weeks: weeks
-
-      renderWeek = (date, month) ->
-        days = []
-        for i in [1..7]
-            days.push renderDay date, month
-            date.setDate date.getDate() + 1
-        Template.calWeek
-            days: days
-
-      renderDay = (date, month) ->
-        Template.calDay
-            inactive: date.getMonth() isnt month
-            date: date.getDate()
-
-      Template.calendar.calendar = ->
-        renderCal()
-
-## Main
-
-      Template.main.content = ->
-        if not Meteor.userId() and not eventDB.findOne {_id: pageName()} 
-            Template.signInToCreateEvent()
-        else
-            Template.event()
+    if Meteor.isClient
+        Template.calendar.months = createMonths
+        Template.main.content = ->
+            if not Meteor.userId() and not eventDB.findOne {_id: pageName()} 
+                Template.signInToCreateEvent()
+            else
+                Template.event()
 
 ### Event description
 
+    if Meteor.isClient
       pageName = ->
         return location.pathname.slice(1)
 
@@ -160,4 +148,3 @@ Implemented in Literate CoffeeScript, meaning that this document is also the pro
         "October"
         "November"
         "December"]
-

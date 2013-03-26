@@ -7,17 +7,17 @@
 </body>
 
 <template name="main">
-    {{{content}}}
+{{{content}}}
 </template>
 
 <template name="signInToCreateEvent">
-    Please sign in to create an event: {{loginButtons}}
+Please sign in to create an event: {{loginButtons}}
 </template>
 
 <template name="event">
-    {{loginButtons}}
-    {{>eventDescription}}
-    {{>calendar}}
+{{loginButtons}}
+{{>eventDescription}}
+{{>calendar}}
 </template>
 
 <template name="eventDescription">
@@ -25,23 +25,25 @@
 </template>
 
 <template name="eventEdit">
+<div>
 <h1><input id="titleEdit" value="{{title}}"></h1>
 <p><textarea id="descEdit">{{desc}}</textarea></p>
 <button id="save">Save</button>
+</div>
 </template>
 
 <template name="eventShow">
+<div>
 <h1>{{title}}</h1>
 <p>{{{desc}}}</p>
 <button id="edit">Edit</button>
+</div>
 </template>
 
 <template name="calendar">
-{{{calendar}}}
-</template>
-
-<template name="calMonth"><div class="month">
-    <h3>{{monthName}}</h3>
+{{#each months}}
+<div class="month">
+    <h3>{{{this.monthName}}}</h3>
     <div class="week header">
         <span class="day header">m</span>
         <span class="day header">t</span>
@@ -51,10 +53,15 @@
         <span class="day header">s</span>
         <span class="day header">s</span>
     </div>
-    {{#each weeks}}
-        {{{this}}}
+    {{#each this.weeks}}
+    <div class="week header">
+        {{#each this}}
+        <span class="day{{#if this.inactive true}} inactive{{/if}}">
+            {{{this.date}}}
+        </span>
+        {{/each}}
+    </div>
     {{/each}}
-</div></template>
-
-<template name="calWeek"><div class="week">{{#each days}}{{{this}}}{{/each}}</div></template>
-<template name="calDay"><span class="day{{#if inactive true}} inactive{{/if}}">{{{date}}}</day></template>
+</div>
+{{/each}}
+</template>
