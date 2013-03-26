@@ -40,19 +40,27 @@ Implemented in Literate CoffeeScript, meaning that this document is also the pro
 ## Calendar data structure
 
     createMonths = ->
+        maxGood = 0
         createWeeks = ->
             createDays = ->
                 days = []
                 for day in [1..7]
                     fulldate = fullUTCdate(date)
+                    signups = signupDB.find
+                        event: pageName()
+                        user: Meteor.userId()
+                        date: fulldate
+                    goods = signups.fetch().filter((s)-> s.status is "good").length
+                    maxGood = Math.max goods, maxGood
                     days.push
-                        inactive: date.getUTCMonth() isnt month
+                        inactive: date.getUTCMonth() isnt month or
+                            +date < Date.now()
                         date: date.getUTCDate()
                         fulldate: fulldate
-                        status: signupDB.findOne 
+                        status: (signupDB.findOne 
                             event: pageName()
                             user: Meteor.userId()
-                            date: fulldate
+                            date: fulldate)?.status || ""
                     date.setDate date.getUTCDate() + 1
                 days
 
@@ -62,11 +70,12 @@ Implemented in Literate CoffeeScript, meaning that this document is also the pro
             weeks = [createDays()]
             while date.getUTCMonth() is month
                 weeks.push createDays()
+            console.log maxGood
             weeks
 
         date = new Date()
         curMonth = date.getUTCMonth()
-        [0..11].map (i) ->
+        [0..4].map (i) ->
             date.setUTCDate 1
             date.setUTCMonth curMonth + i
             { 
@@ -86,7 +95,19 @@ Implemented in Literate CoffeeScript, meaning that this document is also the pro
                     user: Meteor.userId()
                     date: this.fulldate
                 console.log "query", query
-                signupDB.update query, {status: "√"}, {upsert: true}
+                signup = signupDB.findOne query
+                if signup
+                    if signup.status is "good"
+                        signup.status = "bad"
+                    else if signup.status is "bad"
+                        signup.status = ""
+                    else
+                        signup.status = "good"
+                    signupDB.update signup._id, signup
+                else
+                    signup = query
+                    signup.status = "good"
+                    signupDB.insert signup
 
 ## The Client
 

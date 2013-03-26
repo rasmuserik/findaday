@@ -62,7 +62,7 @@ Please sign in to create an event: {{loginButtons}}
     {{#each this.weeks}}
     <div class="week header">
         {{#each this}}
-        <span class="day{{#if this.inactive true}} inactive{{/if}}">
+        <span class="day{{#if this.inactive true}} inactive{{/if}} {{this.status}}">
             {{{this.date}}}
         </span>
         {{/each}}
