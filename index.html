@@ -20,7 +20,14 @@ Please sign in to create an event: {{loginButtons}}
 </template>
 
 <template name="eventDescription">
-{{{eventDescription}}}
+{{#if edit}}
+{{{markdownDescription}}}
+<button id="save">save</button>
+{{else}}
+{{{htmlDescription}}}
+{{owner}}
+{{#if owner}}<button id="edit">edit</button>{{/if}}
+{{/if}}
 </template>
 
 <template name="eventEdit">

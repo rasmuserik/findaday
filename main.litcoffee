@@ -36,8 +36,28 @@ Implemented in Literate CoffeeScript, meaning that this document is also the pro
 
 # Actual implementation
 
+## Databases and global state
 
-## Calendar data structure
+    if Meteor.isClient
+        pageName = ->
+            return location.pathname.slice(1)
+
+
+    eventDB = new Meteor.Collection("events")
+    signupDB = new Meteor.Collection("signups")
+
+    if Meteor.isClient
+        Meteor.subscribe "event", pageName()
+
+    if Meteor.isServer
+        Meteor.publish "event", (event) ->
+            console.log event
+            [ (eventDB.find {_id: event}), (signupDB.find {event: event}) ]
+
+
+## Calendar 
+
+### Create data structure
 
     createMonths = ->
         maxGood = 0
@@ -85,14 +105,15 @@ Implemented in Literate CoffeeScript, meaning that this document is also the pro
             }
 ### Bind clicks
 
-    if Meteor.isClient and Meteor.userId()
+    if Meteor.isClient and Meteor.user()
         Template.calendar.events
             "click .day": (a, b, c, d) ->
                 console.log "this", this
                 console.log "abcd", a, b, c, d
                 query = 
                     event: pageName(),
-                    user: Meteor.userId()
+                    user: Meteor.user()._id
+                    username: Meteor.user().profile.name
                     date: this.fulldate
                 console.log "query", query
                 signup = signupDB.findOne query
@@ -109,12 +130,6 @@ Implemented in Literate CoffeeScript, meaning that this document is also the pro
                     signup.status = "good"
                     signupDB.insert signup
 
-## The Client
-
-    if Meteor.isClient
-        pageName = ->
-            return location.pathname.slice(1)
-
 ### Main
 
     if Meteor.isClient
@@ -128,13 +143,51 @@ Implemented in Literate CoffeeScript, meaning that this document is also the pro
 ### Event description
 
     if Meteor.isClient
+        Template.eventDescription.edit = ->
+            Session.get "edit"
+
+        Template.eventDescription.htmlDescription = ->
+            event = eventDB.findOne {_id: pageName()}
+            (new Showdown.converter()).makeHtml event.desc if event
+
+        Template.eventDescription.markdownDescription = ->
+            event = eventDB.findOne {_id: pageName()}
+            event.desc if event
+
+    #    Template.eventDescription.owner -> 
+    #        "foo"
+    #        event = eventDB.findOne {_id: pageName()}
+    #        event.owner[Meteor.userId()] if event
+
+        Template.eventDescription.events
+            "click #edit": ->
+                Session.set "edit", true
+
+        Template.eventDescription.events
+            "click #save": ->
+                Session.set "edit", false
+
+
+    if Meteor.isClient 
 
       Template.eventDescription.eventDescription = ->
         edit = Session.get "edit"
         event = eventDB.findOne {_id: pageName()}
         console.log event, edit
         if not event
-            event = {_id: pageName(), desc: "# " + pageName() + "\n\n description here..."}
+            if not Meteor.user() 
+                return undefined
+            owner = {}
+            important = {}
+            owner[Meteor.userId()] = Meteor.user()?.profile?.name
+            important[Meteor.userId()] = Meteor.user()?.profile?.name
+            console.log "me", Meteor.userId(), Meteor.user()?.profile?.name
+            console.log owner, important
+            event = 
+                _id: pageName()
+                desc: "# " + pageName() + "\n\n description here..."
+                owner: owner
+                important: important
             eventDB.insert event 
         if edit
             Template.eventEdit
@@ -159,19 +212,6 @@ Implemented in Literate CoffeeScript, meaning that this document is also the pro
     if Meteor.isServer
         Meteor.startup ->
             console.log "server startup"
-
-## Databases and global state
-
-    eventDB = new Meteor.Collection("events")
-    signupDB = new Meteor.Collection("signups")
-
-    if Meteor.isClient
-        Meteor.subscribe "event", pageName()
-
-    if Meteor.isServer
-        Meteor.publish "event", (event) ->
-            console.log event
-            [ (eventDB.find {_id: event}), (signupDB.find {event: event}) ]
 
 ## General utility functions
 
