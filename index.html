@@ -31,6 +31,23 @@ Please sign in to create an event: {{loginButtons}}
     {{#if owner}}<button id="edit">edit</button>{{/if}}
 </div>
 {{/if}}
+{{#if owner}}
+<div>
+    <table class="participantTable">
+        <tr>
+            <th>Participant</th><th>Owner</th><th>Important</th><th></th>
+        </tr>
+        {{#each participants}}
+        <tr>
+            <td>{{this.name}}</td>
+            <td><input type="checkbox" class="participantOwner" {{#if this.isOwner}}checked="checked"{{/if}}></td>
+            <td><input type="checkbox" class="participantOwner" {{#if this.important}}checked="checked"{{/if}}></td>
+            <td><button class="deleteUser">delete</button></td>
+        </tr>
+        {{/each}}
+    </table>
+</div>
+{{/if}}
 </template>
 
 

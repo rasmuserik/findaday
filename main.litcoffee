@@ -161,6 +161,20 @@ Implemented in Literate CoffeeScript, meaning that this document is also the pro
                     eventDB.insert event 
             event
 
+        Template.eventDescription.participants = ->
+            event = getEvent()
+            result = {}
+            for uid, name of event.owner
+                result[uid] = result[uid] || { name: name, uid: uid }
+                result[uid].isOwner = true
+            for uid, name of event.important
+                result[uid] = result[uid] || { name: name, uid: uid }
+                result[uid].important = true
+            for obj in signupDB.find({event: pageName()}).fetch()
+                if not result[obj.user]
+                    result[obj.user] = {name: obj.username}
+            obj for _, obj of result
+
         Template.eventDescription.edit = ->
             Session.get "edit"
 
