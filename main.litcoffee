@@ -105,11 +105,13 @@ Implemented in Literate CoffeeScript, meaning that this document is also the pro
             }
 ### Bind clicks
 
-    if Meteor.isClient and Meteor.user()
+    if Meteor.isClient
         Template.calendar.events
             "click .day": (a, b, c, d) ->
                 console.log "this", this
                 console.log "abcd", a, b, c, d
+                if not Meteor.user()
+                    return undefined
                 query = 
                     event: pageName(),
                     user: Meteor.user()._id
@@ -143,21 +145,34 @@ Implemented in Literate CoffeeScript, meaning that this document is also the pro
 ### Event description
 
     if Meteor.isClient
+        getEvent = ->
+            event = eventDB.findOne {_id: pageName()}
+            if not event
+                owner = {}
+                important = {}
+                owner[Meteor.userId()] = Meteor.user()?.profile?.name
+                important[Meteor.userId()] = Meteor.user()?.profile?.name
+                event = 
+                    _id: pageName()
+                    desc: "# " + pageName() + "\n\ndescription here..."
+                    owner: owner
+                    important: important
+                if Meteor.user()
+                    eventDB.insert event 
+            event
+
         Template.eventDescription.edit = ->
             Session.get "edit"
 
         Template.eventDescription.htmlDescription = ->
-            event = eventDB.findOne {_id: pageName()}
-            (new Showdown.converter()).makeHtml event.desc if event
+            (new Showdown.converter()).makeHtml getEvent().desc
 
         Template.eventDescription.markdownDescription = ->
-            event = eventDB.findOne {_id: pageName()}
-            event.desc if event
+            getEvent().desc
 
-    #    Template.eventDescription.owner -> 
-    #        "foo"
-    #        event = eventDB.findOne {_id: pageName()}
-    #        event.owner[Meteor.userId()] if event
+        Template.eventDescription.owner = ->
+            console.log "HERE", Meteor.user(), getEvent()?.owner
+            getEvent().owner?[Meteor.user()?._id] 
 
         Template.eventDescription.events
             "click #edit": ->
@@ -165,47 +180,10 @@ Implemented in Literate CoffeeScript, meaning that this document is also the pro
 
         Template.eventDescription.events
             "click #save": ->
+                event = getEvent()
+                event.desc = (document.getElementById "descEdit").value
+                eventDB.update {_id: event._id}, event
                 Session.set "edit", false
-
-
-    if Meteor.isClient 
-
-      Template.eventDescription.eventDescription = ->
-        edit = Session.get "edit"
-        event = eventDB.findOne {_id: pageName()}
-        console.log event, edit
-        if not event
-            if not Meteor.user() 
-                return undefined
-            owner = {}
-            important = {}
-            owner[Meteor.userId()] = Meteor.user()?.profile?.name
-            important[Meteor.userId()] = Meteor.user()?.profile?.name
-            console.log "me", Meteor.userId(), Meteor.user()?.profile?.name
-            console.log owner, important
-            event = 
-                _id: pageName()
-                desc: "# " + pageName() + "\n\n description here..."
-                owner: owner
-                important: important
-            eventDB.insert event 
-        if edit
-            Template.eventEdit
-                desc: event.desc
-        else
-            Template.eventShow
-                desc: (new Showdown.converter()).makeHtml event.desc
-
-      Template.eventShow.events
-        "click #edit": ->
-            Session.set "edit", true
-
-      Template.eventEdit.events
-        "click #save": ->
-            desc = (document.getElementById "descEdit").value
-            eventDB.update {_id: pageName()}, {desc: desc}
-            console.log "HERE"
-            Session.set "edit", false
 
 ## Server
 

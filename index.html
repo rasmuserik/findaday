@@ -21,61 +21,51 @@ Please sign in to create an event: {{loginButtons}}
 
 <template name="eventDescription">
 {{#if edit}}
-{{{markdownDescription}}}
-<button id="save">save</button>
+<div>
+    <textarea id="descEdit" rows="25" cols="72">{{{markdownDescription}}}</textarea>
+    <button id="save">save</button>
+</div>
 {{else}}
-{{{htmlDescription}}}
-{{owner}}
-{{#if owner}}<button id="edit">edit</button>{{/if}}
+<div>
+    {{{htmlDescription}}}
+    {{#if owner}}<button id="edit">edit</button>{{/if}}
+</div>
 {{/if}}
 </template>
 
-<template name="eventEdit">
-<div>
-<p><textarea id="descEdit" rows="25" cols="72">{{desc}}</textarea></p>
-<button id="save">Save</button>
-</div>
-</template>
-
-<template name="eventShow">
-<div>
-<p>{{{desc}}}</p>
-<button id="edit">Edit</button>
-</div>
-</template>
 
 <template name="calendar">
 <div>
     {{#if currentUser}}
-        Hi {{loginButtons}},
-        click on the colored days below to indicate whether it would be a good(√) og bad(÷) day for you :)
+    Hi {{loginButtons}},
+    click on the colored days below to indicate whether it would be a good(√) og bad(÷) day for you :)
     {{else}}
     {{loginButtons}} to vote on dates below <small>(or view or change your votes)</small>.
     {{/if}}
 </div>
 <div {{#unless currentUser}}class="disabled"{{/unless}}>
-{{#each months}}
-<div class="month">
-    <h3>{{{this.monthName}}}</h3>
-    <div class="week header">
-        <span class="day header">m</span>
-        <span class="day header">t</span>
-        <span class="day header">w</span>
-        <span class="day header">t</span>
-        <span class="day header">f</span>
-        <span class="day header">s</span>
-        <span class="day header">s</span>
-    </div>
-    {{#each this.weeks}}
-    <div class="week header">
-        {{#each this}}
-        <span class="day{{#if this.inactive true}} inactive{{/if}} {{this.status}}">
-            {{{this.date}}}
-        </span>
+    {{#each months}}
+    <div class="month">
+        <h3>{{{this.monthName}}}</h3>
+        <div class="week header">
+            <span class="day header">m</span>
+            <span class="day header">t</span>
+            <span class="day header">w</span>
+            <span class="day header">t</span>
+            <span class="day header">f</span>
+            <span class="day header">s</span>
+            <span class="day header">s</span>
+        </div>
+        {{#each this.weeks}}
+        <div class="week header">
+            {{#each this}}
+            <span class="day{{#if this.inactive true}} inactive{{/if}} {{this.status}}">
+                {{{this.date}}}
+            </span>
+            {{/each}}
+        </div>
         {{/each}}
     </div>
-    {{/each}}
-</div>
 </div>
 {{/each}}
 </template>
