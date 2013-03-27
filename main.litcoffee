@@ -81,6 +81,10 @@ Implemented in Literate CoffeeScript, meaning that this document is also the pro
                             event: pageName()
                             user: Meteor.userId()
                             date: fulldate)?.status || ""
+                        clicked: (signupDB.findOne 
+                            event: pageName()
+                            user: Meteor.userId()
+                            date: fulldate)?.status is "good"
                     date.setDate date.getUTCDate() + 1
                 days
 
@@ -95,7 +99,7 @@ Implemented in Literate CoffeeScript, meaning that this document is also the pro
 
         date = new Date()
         curMonth = date.getUTCMonth()
-        [0..4].map (i) ->
+        [0..5].map (i) ->
             date.setUTCDate 1
             date.setUTCMonth curMonth + i
             { 
@@ -121,8 +125,8 @@ Implemented in Literate CoffeeScript, meaning that this document is also the pro
                 signup = signupDB.findOne query
                 if signup
                     if signup.status is "good"
-                        signup.status = "bad"
-                    else if signup.status is "bad"
+                    #    signup.status = "bad"
+                    #else if signup.status is "bad"
                         signup.status = ""
                     else
                         signup.status = "good"
@@ -161,20 +165,6 @@ Implemented in Literate CoffeeScript, meaning that this document is also the pro
                     eventDB.insert event 
             event
 
-        Template.eventDescription.participants = ->
-            event = getEvent()
-            result = {}
-            for uid, name of event.owner
-                result[uid] = result[uid] || { name: name, uid: uid }
-                result[uid].isOwner = true
-            for uid, name of event.important
-                result[uid] = result[uid] || { name: name, uid: uid }
-                result[uid].important = true
-            for obj in signupDB.find({event: pageName()}).fetch()
-                if not result[obj.user]
-                    result[obj.user] = {name: obj.username}
-            obj for _, obj of result
-
         Template.eventDescription.edit = ->
             Session.get "edit"
 
@@ -185,7 +175,6 @@ Implemented in Literate CoffeeScript, meaning that this document is also the pro
             getEvent().desc
 
         Template.eventDescription.owner = ->
-            console.log "HERE", Meteor.user(), getEvent()?.owner
             getEvent().owner?[Meteor.user()?._id] 
 
         Template.eventDescription.events
@@ -198,6 +187,50 @@ Implemented in Literate CoffeeScript, meaning that this document is also the pro
                 event.desc = (document.getElementById "descEdit").value
                 eventDB.update {_id: event._id}, event
                 Session.set "edit", false
+
+### participant list when owner
+
+        Template.eventDescription.participants = ->
+            event = getEvent()
+            result = {}
+            for uid, name of event.owner
+                result[uid] = result[uid] || { name: name, uid: uid }
+                result[uid].isOwner = true
+            for uid, name of event.important
+                result[uid] = result[uid] || { name: name, uid: uid }
+                result[uid].important = true
+            for obj in signupDB.find({event: pageName()}).fetch()
+                if not result[obj.user]
+                    result[obj.user] = {name: obj.username, uid: obj.user}
+            obj for _, obj of result
+
+        Template.eventDescription.events
+            "click .participantOwner": ->
+                event = getEvent()
+                if this.isOwner
+                    console.log "CCC", this.uid, Meteor.userId()
+                    if this.uid is Meteor.userId()
+                        alert "cannot remove self as owner"
+                    else
+                        delete event.owner[this.uid]
+                else
+                    event.owner[this.uid] = this.name
+                eventDB.update {_id: event._id}, event
+
+        Template.eventDescription.events
+            "click .participantImportant": ->
+                event = getEvent()
+                if this.important
+                    delete event.important[this.uid]
+                else
+                    event.important[this.uid] = this.name
+                eventDB.update {_id: event._id}, event
+
+        Template.eventDescription.events
+            "click .deleteParticipant": (obj) ->
+                console.log this.uid
+                for signup in signupDB.find({event: pageName(), user: this.uid}).fetch()
+                    signupDB.remove {_id: signup._id}
 
 ## Server
 

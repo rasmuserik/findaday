@@ -41,8 +41,8 @@ Please sign in to create an event: {{loginButtons}}
         <tr>
             <td>{{this.name}}</td>
             <td><input type="checkbox" class="participantOwner" {{#if this.isOwner}}checked="checked"{{/if}}></td>
-            <td><input type="checkbox" class="participantOwner" {{#if this.important}}checked="checked"{{/if}}></td>
-            <td><button class="deleteUser">delete</button></td>
+            <td><input type="checkbox" class="participantImportant" {{#if this.important}}checked="checked"{{/if}}></td>
+            <td><button class="deleteParticipant">clear dates</button></td>
         </tr>
         {{/each}}
     </table>
@@ -77,7 +77,8 @@ Please sign in to create an event: {{loginButtons}}
         <div class="week header">
             {{#each this}}
             <span class="day{{#if this.inactive true}} inactive{{/if}} {{this.status}}">
-                {{{this.date}}}
+                {{{this.date}}} <br>
+                <input type="checkbox" class="participantOwner" {{#if this.clicked}}checked="checked"{{/if}}>
             </span>
             {{/each}}
         </div>
