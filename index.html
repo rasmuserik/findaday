@@ -76,7 +76,7 @@ Please sign in to create an event: {{loginButtons}}
         {{#each this.weeks}}
         <div class="week header">
             {{#each this}}
-            <span class="day{{#if this.inactive true}} inactive{{/if}} {{this.status}}">
+            <span class="day{{#if this.inactive true}} inactive{{/if}} {{this.status}}" style="background: rgba({{this.color}},0.3)">
                 {{{this.date}}} <br>
                 <input type="checkbox" class="participantOwner" {{#if this.clicked}}checked="checked"{{/if}}>
             </span>

@@ -60,7 +60,7 @@ Implemented in Literate CoffeeScript, meaning that this document is also the pro
 ### Create data structure
 
     createMonths = ->
-        maxGood = 0
+        maxParticipants = 0
         createWeeks = ->
             createDays = ->
                 days = []
@@ -68,14 +68,14 @@ Implemented in Literate CoffeeScript, meaning that this document is also the pro
                     fulldate = fullUTCdate(date)
                     signups = signupDB.find
                         event: pageName()
-                        user: Meteor.userId()
                         date: fulldate
-                    goods = signups.fetch().filter((s)-> s.status is "good").length
-                    maxGood = Math.max goods, maxGood
+                    participants = signups.fetch().filter((s)-> s.status is "good").length
+                    maxParticipants = Math.max participants, maxParticipants
                     days.push
                         inactive: date.getUTCMonth() isnt month or
                             +date < Date.now()
                         date: date.getUTCDate()
+                        participants: participants 
                         fulldate: fulldate
                         status: (signupDB.findOne 
                             event: pageName()
@@ -94,12 +94,11 @@ Implemented in Literate CoffeeScript, meaning that this document is also the pro
             weeks = [createDays()]
             while date.getUTCMonth() is month
                 weeks.push createDays()
-            console.log maxGood
+            console.log maxParticipants
             weeks
-
         date = new Date()
         curMonth = date.getUTCMonth()
-        [0..5].map (i) ->
+        result = [0..5].map (i) ->
             date.setUTCDate 1
             date.setUTCMonth curMonth + i
             { 
@@ -107,6 +106,22 @@ Implemented in Literate CoffeeScript, meaning that this document is also the pro
                 monthName: monthNames[date.getUTCMonth()]
                 weeks: createWeeks()
             }
+        result.forEach (month) ->
+            month.weeks.forEach (week) ->
+                week.forEach (day) ->
+                    day.ratio = day.participants / (maxParticipants || 1)
+                    if day.participants
+                        day.color = calendarColor day.ratio
+                    else
+                        day.color = "255,255,255"
+        result
+
+    calendarColor = (ratio) ->
+        if ratio < .5
+            "255,#{255*2*ratio},0"
+        else
+            "#{255-255*2*(ratio-0.5)},255,0"
+
 ### Bind clicks
 
     if Meteor.isClient
