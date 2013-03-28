@@ -118,9 +118,9 @@ Implemented in Literate CoffeeScript, meaning that this document is also the pro
 
     calendarColor = (ratio) ->
         if ratio < .5
-            "255,#{255*2*ratio},0"
+            "255,#{Math.floor(255*2*ratio)},0"
         else
-            "#{255-255*2*(ratio-0.5)},255,0"
+            "#{255-Math.floor(255*2*(ratio-0.5))},255,0"
 
 ### Bind clicks
 

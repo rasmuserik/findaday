@@ -21,12 +21,12 @@ Please sign in to create an event: {{loginButtons}}
 
 <template name="eventDescription">
 {{#if edit}}
-<div>
+<div class="eventDesc">
     <textarea id="descEdit" rows="25" cols="72">{{{markdownDescription}}}</textarea>
     <button id="save">save</button>
 </div>
 {{else}}
-<div>
+<div class="eventDesc">
     {{{htmlDescription}}}
     {{#if owner}}<button id="edit">edit</button>{{/if}}
 </div>
@@ -52,15 +52,15 @@ Please sign in to create an event: {{loginButtons}}
 
 
 <template name="calendar">
-<div>
+<div class="usageDescription">
     {{#if currentUser}}
     Hi {{loginButtons}},
-    click on the colored days below to indicate whether it would be a good(√) og bad(÷) day for you :)
+    click on the colored days below to indicate whether it would be a good og bad day for you :)
     {{else}}
     {{loginButtons}} to vote on dates below <small>(or view or change your votes)</small>.
     {{/if}}
 </div>
-<div {{#unless currentUser}}class="disabled"{{/unless}}>
+<div class="months {{#unless currentUser}}disabled{{/unless}}">
     {{#each months}}
     <div class="month">
         <h3>{{{this.monthName}}}</h3>
