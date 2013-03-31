@@ -35,13 +35,13 @@ Please sign in to create an event: {{loginButtons}}
 <div>
     <table class="participantTable">
         <tr>
-            <th>Participant</th><th>Owner</th><th>Important</th><th></th>
+            <th>Participant</th><th>Owner</th><!--th>Important</th--><th></th>
         </tr>
         {{#each participants}}
         <tr>
             <td>{{this.name}}</td>
             <td><input type="checkbox" class="participantOwner" {{#if this.isOwner}}checked="checked"{{/if}}></td>
-            <td><input type="checkbox" class="participantImportant" {{#if this.important}}checked="checked"{{/if}}></td>
+            <!--td><input type="checkbox" class="participantImportant" {{#if this.important}}checked="checked"{{/if}}></td-->
             <td><button class="deleteParticipant">clear dates</button></td>
         </tr>
         {{/each}}
@@ -55,7 +55,7 @@ Please sign in to create an event: {{loginButtons}}
 <div class="usageDescription">
     {{#if currentUser}}
     Hi {{loginButtons}},
-    click on the colored days below to indicate whether it would be a good og bad day for you :)
+    click on the colored days below to indicate whether it would be a good day for you :)
     {{else}}
     {{loginButtons}} to vote on dates below <small>(or view or change your votes)</small>.
     {{/if}}
