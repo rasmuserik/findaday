@@ -6,6 +6,8 @@ which days are possible.
 
 Implemented in Literate CoffeeScript, meaning that this document is also the program :)
 
+Should be running online on http://findaday.meteor.com/.
+
 _Warning:_ this code is just a hack to quickly get an app with the functionality to choose days, - not really maintained or well written :)
 
 # General utility functions
