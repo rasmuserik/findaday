@@ -6,61 +6,67 @@ which days are possible.
 
 Implemented in Literate CoffeeScript, meaning that this document is also the program :)
 
+_Warning:_ this code is just a hack to quickly get an app with the functionality to choose days, - not really maintained or well written :)
 
-# Crating notenotes
+# General utility functions
 
-- only log in via twitter/fb/google/..., no local login management
-- Show description and login and gray-out calender, when not logged in. 
-- creator is event-owner per default
-- event-owner can add other owners from participant list. can remove newer owners from list
-- event-owner can edit description for event
-- event-owner can set critical participants
+We start out wit a couple of utility functions.
 
-# Tasks
-
-- edit only when owner
-- participant property list when owner (critical,owner)
-- add owner / remove newer owners
-- sign-up database and clickable dates when logged in
-- unloggedin-view - gray-out + login-info
-- markdown description
-- calendar show date status 
-
-- later
-    - switch to std-dates instead of based on local time.
-    - better styling
-    - secure
-    - list of best dates
-    - change number of months shown
-
-
-# Actual implementation
-
-## Databases and global state
+A single event is shown at the time, the name of the event shown are found from the url/location:
 
     if Meteor.isClient
         pageName = ->
             return location.pathname.slice(1)
 
+## Calendar utilities
+
+We want to get a textual representation for the date. This is also used as key in the database of signups.
+
+    fullUTCdate = (date) ->
+        date.getUTCFullYear() + "-" + 
+        (date.getUTCMonth() + 1) + "-" + 
+        date.getUTCDate()
+
+When showing the calendar, we want nicely printed names, so we have a list of the months here.
+
+    monthNames = [
+        "January"
+        "February"
+        "March"
+        "April"
+        "May"
+        "June"
+        "July"
+        "August"
+        "September"
+        "October"
+        "November"
+        "December"]
+
+# Databases and state
+
+There are two databases used in the program:
+
+- the events with description and owner info
+- the signups which is event, day, and participant plus participation status
 
     eventDB = new Meteor.Collection("events")
     signupDB = new Meteor.Collection("signups")
+
+The data for the current event should be synchronised to the client
 
     if Meteor.isClient
         Meteor.subscribe "event", pageName()
 
     if Meteor.isServer
         Meteor.publish "event", (event) ->
-            console.log event
             [ (eventDB.find {_id: event}), (signupDB.find {event: event}) ]
 
+# Calendar data structure
 
-## Calendar 
-
-### Create data structure
+The calendar is created as a data structure, which is then rendered with the templates in `index.html`
 
     createMonths = ->
-        maxParticipants = 0
         createWeeks = ->
             createDays = ->
                 days = []
@@ -96,6 +102,8 @@ Implemented in Literate CoffeeScript, meaning that this document is also the pro
                 weeks.push createDays()
             console.log maxParticipants
             weeks
+
+        maxParticipants = 0
         date = new Date()
         curMonth = date.getUTCMonth()
         result = [0..5].map (i) ->
@@ -122,7 +130,7 @@ Implemented in Literate CoffeeScript, meaning that this document is also the pro
         else
             "#{255-Math.floor(255*2*(ratio-0.5))},255,0"
 
-### Bind clicks
+## Bind clicks for calendar
 
     if Meteor.isClient
         Template.calendar.events
@@ -151,17 +159,7 @@ Implemented in Literate CoffeeScript, meaning that this document is also the pro
                     signup.status = "good"
                     signupDB.insert signup
 
-### Main
-
-    if Meteor.isClient
-        Template.calendar.months = createMonths
-        Template.main.content = ->
-            if not Meteor.userId() and not eventDB.findOne {_id: pageName()} 
-                Template.signInToCreateEvent()
-            else
-                Template.event()
-
-### Event description
+# Editable event description
 
     if Meteor.isClient
         getEvent = ->
@@ -203,7 +201,7 @@ Implemented in Literate CoffeeScript, meaning that this document is also the pro
                 eventDB.update {_id: event._id}, event
                 Session.set "edit", false
 
-### participant list when owner
+# Participant list when logged in as owner
 
         Template.eventDescription.participants = ->
             event = getEvent()
@@ -247,30 +245,13 @@ Implemented in Literate CoffeeScript, meaning that this document is also the pro
                 for signup in signupDB.find({event: pageName(), user: this.uid}).fetch()
                     signupDB.remove {_id: signup._id}
 
-## Server
+# Main
 
-    if Meteor.isServer
-        Meteor.startup ->
-            console.log "server startup"
+    if Meteor.isClient
+        Template.calendar.months = createMonths
+        Template.main.content = ->
+            if not Meteor.userId() and not eventDB.findOne {_id: pageName()} 
+                Template.signInToCreateEvent()
+            else
+                Template.event()
 
-## General utility functions
-
-    fullUTCdate = (date) ->
-        date.getUTCFullYear() + "-" + 
-        (date.getUTCMonth() + 1) + "-" + 
-        date.getUTCDate()
-
-
-    monthNames = [
-        "January"
-        "February"
-        "March"
-        "April"
-        "May"
-        "June"
-        "July"
-        "August"
-        "September"
-        "October"
-        "November"
-        "December"]
