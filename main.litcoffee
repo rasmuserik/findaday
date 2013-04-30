@@ -1,4 +1,4 @@
-# Find-a-day
+# ![logo](https://solsort.com/_logo.png) Find-a-day
 
 This will be a simple web app for choosing days for events,
 essentially just showing a calendar, and then people can tick of
